@@ -1,0 +1,4 @@
+# Python dependencies
+opencv-python
+flask
+face_recognition
