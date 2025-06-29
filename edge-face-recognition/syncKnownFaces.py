@@ -2,24 +2,21 @@ import pandas as pd
 import os
 import requests
 
-# === CONFIGURATION ===
-GDRIVE_EXPORT_LINK = "https://docs.google.com/spreadsheets/d/1Nv3cKZLBcBLH0JeLmRTJLOrgHWhIBOV94OyW-mjk0FY/export?format=xlsx"
+EXCEL_URL = "https://docs.google.com/spreadsheets/d/1Nv3cKZLBcBLH0JeLmRTJLOrgHWhIBOV94OyW-mjk0FY/export?format=xlsx"
 EXCEL_PATH = r"E:\5G Face Attendance System\form_responses.xlsx"
 KNOWN_DIR = r"E:\5G Face Attendance System\known faces"
 
 def download_latest_excel():
-    """Download latest Excel from Google Sheets"""
     print("[SYNC] Downloading latest form responses...")
-    response = requests.get(GDRIVE_EXPORT_LINK)
+    response = requests.get(EXCEL_URL)
     if response.status_code == 200:
         with open(EXCEL_PATH, "wb") as f:
             f.write(response.content)
         print("[SYNC] Excel downloaded.")
     else:
-        print("[ERROR] Could not download Excel.")
+        print("[ERROR] Failed to download Excel.")
 
 def extract_drive_id(url):
-    """Extract file ID from Google Drive share link"""
     if "id=" in url:
         return url.split("id=")[-1].split("&")[0]
     elif "/d/" in url:
@@ -29,12 +26,15 @@ def extract_drive_id(url):
 def download_image(file_id, save_path):
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
     response = requests.get(url)
-    if response.status_code == 200:
+
+    content_type = response.headers.get("Content-Type", "")
+    if response.status_code == 200 and "image" in content_type:
         with open(save_path, "wb") as f:
             f.write(response.content)
         print(f"[IMG] Saved: {save_path}")
     else:
-        print(f"[ERROR] Failed to download image: {save_path}")
+        print(f"[ERROR] File is not an image or not accessible: {file_id} ({content_type})")
+
 
 def sync_known_faces():
     if not os.path.exists(KNOWN_DIR):
@@ -46,15 +46,22 @@ def sync_known_faces():
     for _, row in df.iterrows():
         try:
             raw_name = str(row["Photo (name it as ID_Firstname Surname)"]).strip()
+            name = str(row["Name"]).strip()
+            student_id = str(row["Id"]).strip()
             file_id = extract_drive_id(raw_name)
-            filename = raw_name.split('/')[-1] if '/' in raw_name else raw_name
-            filename = filename.replace(" ", "_").replace(".jpg", "") + ".jpg"
+            
+            if not file_id:
+                print(f"[WARN] Could not extract file ID from: {raw_name}")
+                continue
+
+            filename = f"{student_id}_{name.replace(' ', '_')}.jpg"
             save_path = os.path.join(KNOWN_DIR, filename)
 
-            if not os.path.exists(save_path) and file_id:
+            if not os.path.exists(save_path):
                 download_image(file_id, save_path)
         except Exception as e:
             print(f"[WARN] Failed to sync image: {e}")
+
 
 if __name__ == "__main__":
     sync_known_faces()

@@ -4,6 +4,11 @@ import numpy as np
 import os
 from datetime import datetime
 from attendance_logger import log_attendance
+from syncKnownFaces import sync_known_faces
+
+
+# Sync before starting
+sync_known_faces()
 
 # === Load known faces ===
 known_face_encodings = []
@@ -19,8 +24,13 @@ for file in os.listdir(known_dir):
         if encodings:
             known_face_encodings.append(encodings[0])
             filename = file.rsplit('.', 1)[0]
-            name = filename.split('_', 1)[-1]  # Assumes filename format: "ID_Name"
-            known_face_names.append(name)
+            id_and_name = filename.split('_', 1)
+            if len(id_and_name) == 2:
+                student_id, name = id_and_name
+                known_face_names.append((student_id, name))
+            else:
+                print(f"[WARN] Filename not formatted correctly: {filename}")
+
 
 # === Webcam or IP Camera Stream ===
 # 5G LAB: Replace 0 with your IP camera stream URL, e.g., "http://<ip>:<port>/video"
@@ -44,7 +54,7 @@ while True:
         face_distances = face_recognition.face_distance(known_face_encodings, encoding)
         best_match_index = np.argmin(face_distances)
         if matches[best_match_index]:
-            name = known_face_names[best_match_index]
+            student_id, name = known_face_names[best_match_index]
 
             # Replace these with dynamic input or config if needed in 5G deployment
             SUBJECT = "AI/ML"
