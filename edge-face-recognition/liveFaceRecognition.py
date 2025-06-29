@@ -3,11 +3,13 @@ import face_recognition
 import numpy as np
 import os
 from datetime import datetime
+from attendance_logger import log_attendance
 
-# Load known faces
+# === Load known faces ===
 known_face_encodings = []
 known_face_names = []
 
+#  5G LAB: Update path if running in Docker or shared server environment
 known_dir = r"E:\5G Face Attendance System\known faces"
 for file in os.listdir(known_dir):
     if file.lower().endswith((".jpg", ".jpeg", ".png")):
@@ -16,10 +18,13 @@ for file in os.listdir(known_dir):
         encodings = face_recognition.face_encodings(img)
         if encodings:
             known_face_encodings.append(encodings[0])
-            known_face_names.append(file.rsplit('.', 1)[0])
+            filename = file.rsplit('.', 1)[0]
+            name = filename.split('_', 1)[-1]  # Assumes filename format: "ID_Name"
+            known_face_names.append(name)
 
-# Stream from phone camera (IP Webcam app)
-cap = cv2.VideoCapture(0) # Update to your stream IP
+# === Webcam or IP Camera Stream ===
+# 5G LAB: Replace 0 with your IP camera stream URL, e.g., "http://<ip>:<port>/video"
+cap = cv2.VideoCapture(0)
 
 while True:
     ret, frame = cap.read()
@@ -36,16 +41,23 @@ while True:
         matches = face_recognition.compare_faces(known_face_encodings, encoding)
         name = "Unknown"
 
-        if True in matches:
-            index = matches.index(True)
-            name = known_face_names[index]
+        face_distances = face_recognition.face_distance(known_face_encodings, encoding)
+        best_match_index = np.argmin(face_distances)
+        if matches[best_match_index]:
+            name = known_face_names[best_match_index]
 
-        # Draw box and label
+            # Replace these with dynamic input or config if needed in 5G deployment
+            SUBJECT = "AI/ML"
+            LECTURE_SLOT = "10:00 AM - 11:00 AM"
+
+        if name != "Unknown":
+            log_attendance(name, SUBJECT, LECTURE_SLOT)
+
+        # Draw face box and label
         top, right, bottom, left = [v * 4 for v in location]
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
-        cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-
-        # Print recognition event
+        cv2.putText(frame, name, (left, top - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         print(f"{name} recognized at {datetime.now().strftime('%H:%M:%S')}")
 
     cv2.imshow("Live Feed", frame)
