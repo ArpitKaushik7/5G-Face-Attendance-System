@@ -1,3 +1,0 @@
-# tests folder
-
-Purpose: ...

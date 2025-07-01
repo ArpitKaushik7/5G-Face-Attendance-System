@@ -1,3 +1,0 @@
-# Dockerfiles folder
-
-Purpose: ...

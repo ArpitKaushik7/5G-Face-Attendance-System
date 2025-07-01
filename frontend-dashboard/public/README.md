@@ -1,3 +1,0 @@
-# public folder
-
-Purpose: ...
