@@ -1,36 +1,45 @@
 import React, { useState } from 'react';
-import API from '../services/api';
+import axios from 'axios';
 
-function StudentForm() {
+const StudentForm = () => {
   const [formData, setFormData] = useState({
-    id: '', name: '', branch: '', batch: ''
+    id: '',
+    name: '',
+    branch: '',
+    batch: '',
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post('/addStudents', formData);
-      alert('Student added successfully');
+      await axios.post('http://localhost:8000/addStudents', formData);
+      alert('Student added successfully!');
+      setFormData({ id: '', name: '', branch: '', batch: '' });
     } catch (err) {
-      console.error('Add student error:', err);
-      alert('Error adding student');
+      console.error(err);
+      alert('Failed to add student.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add Student</h2>
-      <input name="id" placeholder="ID" onChange={handleChange} required />
-      <input name="name" placeholder="Name" onChange={handleChange} required />
-      <input name="branch" placeholder="Branch" onChange={handleChange} required />
-      <input name="batch" placeholder="Batch" onChange={handleChange} required />
-      <button type="submit">Add</button>
-    </form>
+    <div>
+      <h2>Add New Student</h2>
+      <form onSubmit={handleSubmit}>
+        <input type="text" name="id" placeholder="ID" value={formData.id} onChange={handleChange} required />
+        <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
+        <input type="text" name="branch" placeholder="Branch" value={formData.branch} onChange={handleChange} required />
+        <input type="text" name="batch" placeholder="Batch" value={formData.batch} onChange={handleChange} required />
+        <button type="submit">Add Student</button>
+      </form>
+    </div>
   );
-}
+};
 
 export default StudentForm;

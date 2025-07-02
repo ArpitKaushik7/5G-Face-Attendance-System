@@ -5,13 +5,13 @@ import StudentSearch from 'E:/5G Face Attendance System/frontend/dashboard/src/c
 
 function App() {
   return (
-    <div style={{ padding: 20 }}>
+    <div className="App">
       <h1>5G Face Attendance Dashboard</h1>
       <StudentForm />
       <hr />
-      <StudentSearch />
-      <hr />
       <AttendanceTable />
+      <hr />
+      <StudentSearch />
     </div>
   );
 }

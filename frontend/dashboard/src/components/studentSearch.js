@@ -1,34 +1,63 @@
 import React, { useState } from 'react';
-import API from '../services/api';
+import axios from 'axios';
 
-function StudentSearch() {
-  const [id, setId] = useState('');
-  const [student, setStudent] = useState(null);
+const StudentSearch = () => {
+  const [studentId, setStudentId] = useState('');
+  const [records, setRecords] = useState([]);
+  const [error, setError] = useState('');
 
-  const searchStudent = async () => {
-    try {
-      const res = await API.get(`/attendance/${id}`);
-      setStudent(res.data);
-    } catch {
-      alert("Student not found");
-      setStudent(null);
-    }
+  const handleSearch = () => {
+    if (!studentId.trim()) return;
+
+    axios.get(`http://localhost:8000/attendance/${studentId}`)
+      .then(response => {
+        setRecords(response.data.attendance);
+        setError('');
+      })
+      .catch(err => {
+        console.error('Error fetching student attendance:', err);
+        setRecords([]);
+        setError('No attendance found for this ID.');
+      });
   };
 
   return (
     <div>
-      <h2>Search Student by ID</h2>
-      <input value={id} onChange={(e) => setId(e.target.value)} placeholder="Enter ID" />
-      <button onClick={searchStudent}>Search</button>
-      {student && (
-        <div>
-          <p><strong>Name:</strong> {student.name}</p>
-          <p><strong>Branch:</strong> {student.branch}</p>
-          <p><strong>Batch:</strong> {student.batch}</p>
-        </div>
+      <h2>Search Attendance by Student ID</h2>
+      <input
+        type="text"
+        placeholder="Enter Student ID"
+        value={studentId}
+        onChange={(e) => setStudentId(e.target.value)}
+      />
+      <button onClick={handleSearch}>Search</button>
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {records.length > 0 && (
+        <table border="1" cellPadding="6">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Subject</th>
+              <th>Lecture Slot</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {records.map((entry, index) => (
+              <tr key={index}>
+                <td>{entry.id}</td>
+                <td>{entry.subject}</td>
+                <td>{entry.lecture_slot}</td>
+                <td>{new Date(entry.time).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
-}
+};
 
 export default StudentSearch;
