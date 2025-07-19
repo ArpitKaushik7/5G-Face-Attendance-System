@@ -5,8 +5,8 @@ from PIL import Image, ImageEnhance, ImageFilter
 import random
 
 # === CONFIG ===
-INPUT_IMAGE_PATH = r"E:\5G Face Attendance System\test-data\student_faces\58901\58901_Arpit_Kaushik.jpg"
-OUTPUT_DIR = r"E:\5G Face Attendance System\augmented_faces\58901"
+INPUT_DIR = r"E:\5G Face Attendance System\student's faces"
+OUTPUT_DIR = r"E:\5G Face Attendance System\augmented_faces"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # === AUGMENTATION FUNCTIONS ===
@@ -31,18 +31,28 @@ def apply_blur(img):
 def horizontal_flip(img):
     return img.transpose(Image.FLIP_LEFT_RIGHT)
 
-# === MAIN AUGMENTATION LOOP ===
-original = Image.open(INPUT_IMAGE_PATH).convert("RGB")
 augmentations = [random_rotate, change_brightness, add_noise, apply_blur, horizontal_flip]
 
-# Save original first
-original.save(os.path.join(OUTPUT_DIR, "original.jpg"))
+# === PROCESS EACH STUDENT IMAGE ===
+for filename in os.listdir(INPUT_DIR):
+    if filename.lower().endswith((".jpg", ".jpeg", ".png")):
+        try:
+            student_path = os.path.join(INPUT_DIR, filename)
+            base_name = os.path.splitext(filename)[0]  # e.g. "58901_Arpit_Kaushik"
+            original = Image.open(student_path).convert("RGB")
 
-# Generate 20 augmented samples
-for i in range(1, 21):
-    img = original.copy()
-    for func in random.sample(augmentations, k=random.randint(1, 3)):
-        img = func(img)
-    img.save(os.path.join(OUTPUT_DIR, f"aug_{i}.jpg"))
+            # Save the original image in output dir
+            original.save(os.path.join(OUTPUT_DIR, f"{base_name}_original.jpg"))
 
-print("[SUCCESS] 20 augmented images saved to:", OUTPUT_DIR)
+            # Generate 20 augmentations
+            for i in range(1, 21):
+                img = original.copy()
+                for func in random.sample(augmentations, k=random.randint(1, 3)):
+                    img = func(img)
+                img.save(os.path.join(OUTPUT_DIR, f"{base_name}_aug{i}.jpg"))
+            
+            print(f"[✓] Augmented: {filename}")
+        except Exception as e:
+            print(f"[X] Error processing {filename}: {e}")
+
+print("[✅ DONE] All student images augmented.")

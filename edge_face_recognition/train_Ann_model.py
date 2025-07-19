@@ -1,64 +1,53 @@
 import os
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.optimizers import Adam
-from sklearn.model_selection import train_test_split
+import joblib
+from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import LabelEncoder
-import pickle
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
-# === Load ALL student embeddings from ann_data folder ===
-ANN_DATA_PATH = r"E:\5G Face Attendance System\ann_data"
+# === PATHS ===
+DATA_DIR = r"E:\5G Face Attendance System\ann_data"
+MODEL_PATH = r"E:\5G Face Attendance System\edge_face_recognition\models\ann_model.joblib"
+ENCODER_PATH = r"E:\5G Face Attendance System\edge_face_recognition\models\label_encoder.joblib"
+
+os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
+
+# === Load all embeddings and labels ===
 X = []
 y = []
 
-for student_folder in os.listdir(ANN_DATA_PATH):
-    if not student_folder.endswith("_embeddings.npy"):
-        continue
-    student_id = student_folder.split("_")[0]
-    embeddings = np.load(os.path.join(ANN_DATA_PATH, student_folder))
-    X.append(embeddings)
-    y.extend([student_id] * len(embeddings))
+for file in os.listdir(DATA_DIR):
+    if file.endswith(".npy"):
+        student_id = file.split("_")[0]  # e.g., 58901
+        embeddings = np.load(os.path.join(DATA_DIR, file))  # shape: (N, 512)
+        for emb in embeddings:
+            X.append(emb)
+            y.append(student_id)
 
-X = np.vstack(X)
+X = np.array(X)
 y = np.array(y)
 
-# === Label encode student IDs ===
-le = LabelEncoder()
-y_encoded = le.fit_transform(y)
+print(f"[INFO] Total embeddings: {len(X)}, unique students: {len(set(y))}")
 
-# === Save label encoder ===
-os.makedirs("models", exist_ok=True)
-with open("models/label_encoder.pkl", "wb") as f:
-    pickle.dump(le, f)
+# === Encode labels ===
+label_encoder = LabelEncoder()
+y_encoded = label_encoder.fit_transform(y)
 
 # === Train/test split ===
-X_train, X_val, y_train, y_val = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
 
-# === Define ANN model ===
-num_classes = len(np.unique(y_encoded))
+# === Train ANN ===
+clf = MLPClassifier(hidden_layer_sizes=(256, 128), max_iter=500, random_state=42)
+clf.fit(X_train, y_train)
 
-model = Sequential([
-    Dense(256, activation='relu', input_shape=(512,)),
-    Dropout(0.3),
-    Dense(128, activation='relu'),
-    Dropout(0.3),
-    Dense(num_classes, activation='softmax')
-])
+# === Evaluate ===
+y_pred = clf.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+print(f"[✅] Model accuracy: {acc:.2f}")
 
-model.compile(optimizer=Adam(learning_rate=0.001),
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-
-# === Train ===
-history = model.fit(X_train, y_train,
-                    validation_data=(X_val, y_val),
-                    epochs=30,
-                    batch_size=16)
-
-# === Save model ===
-model.save("models/face_ann_model.h5")
-
-print("[✅] ANN model trained and saved as models/face_ann_model.h5")
-print(f"[🔖] Classes: {le.classes_}")
+# === Save model and encoder ===
+joblib.dump(clf, MODEL_PATH)
+joblib.dump(label_encoder, ENCODER_PATH)
+print(f"[💾] Model saved to {MODEL_PATH}")
+print(f"[💾] Label encoder saved to {ENCODER_PATH}")

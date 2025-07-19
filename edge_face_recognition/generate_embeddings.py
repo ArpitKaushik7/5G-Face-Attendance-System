@@ -1,52 +1,54 @@
 import os
 import numpy as np
 import cv2
+from collections import defaultdict
 from insightface.app import FaceAnalysis
 
 # === PATHS ===
 INPUT_DIR = r"E:\5G Face Attendance System\augmented_faces"
 OUTPUT_DIR = r"E:\5G Face Attendance System\ann_data"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # === Initialize FaceAnalysis ===
 app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(640, 640))
 
-# === Create output folder if not exists ===
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+# === Group images by student ID ===
+student_images = defaultdict(list)
 
-# === Loop through each student folder ===
-for student_id in os.listdir(INPUT_DIR):
-    student_path = os.path.join(INPUT_DIR, student_id)
-    if not os.path.isdir(student_path):
-        continue
+for file in os.listdir(INPUT_DIR):
+    if file.lower().endswith((".jpg", ".jpeg", ".png")):
+        try:
+            student_id = file.split("_")[0]  # Extract ID like 58901
+            student_images[student_id].append(file)
+        except Exception as e:
+            print(f"[X] Error parsing filename {file}: {e}")
 
+# === Generate embeddings for each student ===
+for student_id, files in student_images.items():
     embeddings = []
 
-    print(f"[INFO] Processing student: {student_id}")
+    print(f"[INFO] Processing student ID: {student_id} ({len(files)} images)")
 
-    for file in os.listdir(student_path):
-        img_path = os.path.join(student_path, file)
-
-        # Read and process image
+    for file in files:
+        img_path = os.path.join(INPUT_DIR, file)
         img = cv2.imread(img_path)
         if img is None:
-            print(f"[WARN] Failed to read image: {img_path}")
+            print(f"[WARN] Couldn't read: {img_path}")
             continue
 
         faces = app.get(img)
         if not faces:
-            print(f"[WARN] No face found in {img_path}")
+            print(f"[WARN] No face in: {file}")
             continue
 
-        # Take first face
-        embedding = faces[0].embedding
-        embeddings.append(embedding)
+        embeddings.append(faces[0].embedding)
 
     if embeddings:
         embeddings_array = np.array(embeddings)
         np.save(os.path.join(OUTPUT_DIR, f"{student_id}_embeddings.npy"), embeddings_array)
-        print(f"[✅] Saved embeddings for {student_id}, shape: {embeddings_array.shape}")
+        print(f"[✅] Saved: {student_id}_embeddings.npy ({embeddings_array.shape})")
     else:
-        print(f"[❌] No valid embeddings found for {student_id}")
+        print(f"[❌] No embeddings found for {student_id}")
 
-print("\n[✅] Embedding generation completed for all students.")
+print("\n[✅] Embedding generation completed.")
