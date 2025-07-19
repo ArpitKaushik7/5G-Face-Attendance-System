@@ -61,7 +61,7 @@ while True:
     faces = face_app.get(frame)
 
     for face in faces:
-        emb = face.embedding
+        emb = face.normed_embedding
         distances = [np.linalg.norm(emb - known_emb) for known_emb in known_embeddings]
 
         if distances:
@@ -70,9 +70,9 @@ while True:
             
             x1, y1, x2, y2 = face.bbox.astype(int)
 
-            print(f"[DEBUG] Closest match: {id_name} with distance: {min_dist:.2f}")
+            print(f"[DEBUG] Closest match: {name} with distance: {min_dist:.2f}")
 
-            if min_dist < 1.35:
+            if min_dist < 0.5:
                 student_id, name = known_names[idx].split("_", 1)
                 log_attendance(student_id, name, df, subject=SUBJECT, lecture_slot=LECTURE_SLOT)
 

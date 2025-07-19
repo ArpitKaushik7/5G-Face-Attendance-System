@@ -122,6 +122,62 @@ Suggested next steps:
 ```
 
 ---
+## 📁 Folder Structure
 
-This concludes the documented development history of your intelligent 5G face recognition attendance system.
+```
+📦5G Face Attendance System
+├── backend
+│   ├── main.py
+│   ├── db_utils.py
+│   ├── requirements.txt
+│   └── routes
+│       ├── attendance.py
+│       └── students.py
+├── frontend
+│   └── dashboard (React app)
+├── edge_face_recognition
+│   └── face_attendance.py (or related ML script)
+├── form_responses.xlsx
+└── README.md
+```
 
+---
+Phases of Web Dev part
+
+### 🔙 Phase 1: Data Preparation
+- Collected student data using **Google Forms**
+- Downloaded the form responses as `form_responses.xlsx`
+- Used this Excel for initial data reading before database integration
+
+### 🛠️ Phase 2: Face Recognition + CSV Logging (Initial Demo)
+- Detected and recognized faces using the `face_recognition` library
+- Logged attendance to CSV/Excel
+- This phase helped validate model functionality
+
+### 🧩 Phase 3: Backend API with PostgreSQL
+- Setup PostgreSQL locally
+- Created `attendance_logs` table
+- Implemented FastAPI backend with:
+  - `GET /attendance/` – Fetch latest 50 logs
+  - `GET /attendance/{student_id}` – Fetch logs by student
+  - `POST /addStudents` – Add student details
+  - `GET /students/{student_id}` – Get student details by ID
+- Used `psycopg2` (raw SQL) for DB access
+
+### ⚛️ Phase 4: React Frontend Dashboard
+- Created a React app with `create-react-app`
+- Installed `axios` for HTTP requests
+- Dashboard supports:
+  - Viewing latest attendance entries
+  - Searching student by ID
+  - Submitting new student data via form
+  - Error handling and loading states
+
+### 🔄 Phase 5: Integration Testing
+- Verified full flow:
+  - Form data → PostgreSQL → Displayed in React
+  - Face recognition logs attendance in DB
+- Solved CORS issues between frontend and backend
+- Ensured both frontend and backend run in parallel:
+  - Backend: `uvicorn main:app --reload`
+  - Frontend: `npm start` in `/frontend/dashboard`
