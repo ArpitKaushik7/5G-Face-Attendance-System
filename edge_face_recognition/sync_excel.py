@@ -5,8 +5,8 @@ import os
 import re
 
 EXCEL_URL = 'https://docs.google.com/spreadsheets/d/1Nv3cKZLBcBLH0JeLmRTJLOrgHWhIBOV94OyW-mjk0FY/export?format=xlsx'
-EXCEL_PATH = r"E:\5G Face Attendance System\form_responses.xlsx"
-IMAGE_SAVE_DIR = r"E:\5G Face Attendance System\student's faces"
+EXCEL_PATH = '/home/user/5G-Face-Attendance-System/form_responses.xlsx'
+IMAGE_SAVE_DIR = '/home/user/5G-Face-Attendance-System/student\'s faces'
 
 def download_latest_excel():
     gdown.download(EXCEL_URL, EXCEL_PATH, quiet=False)
@@ -63,7 +63,7 @@ def download_all_student_images(df, save_dir="student_images"):
         file_name = f"{int(student_id)}_{first_name}_{last_name}.jpg"
         file_path = os.path.join(save_dir, file_name)
 
-        # ✅ Skip download if file already exists
+        # Skip download if file already exists
         if os.path.exists(file_path):
             print(f"[⏭] Skipped (already exists): {file_name}")
             continue

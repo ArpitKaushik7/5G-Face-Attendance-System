@@ -8,7 +8,7 @@ DB_USER = "postgres"
 DB_PASSWORD = "Kaushikjii@7"
 DB_HOST = "localhost"
 DB_PORT = "5432"
-EXCEL_PATH = r"E:\5G Face Attendance System\form_responses.xlsx"  # <-- For local testing
+EXCEL_PATH = '/home/user/5G-Face-Attendance-System/form_responses.xlsx'  # <-- For local testing
 
 def log_attendance(name, subject, lecture_slot):
     try:

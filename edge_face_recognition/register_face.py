@@ -3,7 +3,7 @@ from insightface.app import FaceAnalysis
 import os
 
 # === CONFIG ===
-SAVE_DIR = r"E:\5G Face Attendance System\known faces"
+SAVE_DIR = '/home/user/5G-Face-Attendance-System/student\'s faces'
 NAME = "58901_Arpit_Kaushik"
 CAMERA_SOURCE = "http://192.168.29.147"  
 

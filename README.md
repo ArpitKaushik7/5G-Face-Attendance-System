@@ -7,3 +7,8 @@ This project contains the components to run a 5G-enabled face recognition attend
 \c attendance_db;
 
 5gface\Scripts\activate
+
+sudo -i -u postgres
+psql
+\c db_5g_fas;
+SELECT * FROM attendance_logs;

@@ -7,9 +7,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 # === PATHS ===
-DATA_DIR = r"E:\5G Face Attendance System\ann_data"
-MODEL_PATH = r"E:\5G Face Attendance System\edge_face_recognition\models\ann_model.joblib"
-ENCODER_PATH = r"E:\5G Face Attendance System\edge_face_recognition\models\label_encoder.joblib"
+DATA_DIR = '/home/user/5G-Face-Attendance-System/ann_data'
+MODEL_PATH = '/home/user/5G-Face-Attendance-System/models/ann_model.joblib'
+ENCODER_PATH = '/home/user/5G-Face-Attendance-System/models/label_encoder.joblib'
 
 os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
 
@@ -44,10 +44,10 @@ clf.fit(X_train, y_train)
 # === Evaluate ===
 y_pred = clf.predict(X_test)
 acc = accuracy_score(y_test, y_pred)
-print(f"[✅] Model accuracy: {acc:.2f}")
+print(f"Model accuracy: {acc:.2f}")
 
 # === Save model and encoder ===
 joblib.dump(clf, MODEL_PATH)
 joblib.dump(label_encoder, ENCODER_PATH)
-print(f"[💾] Model saved to {MODEL_PATH}")
-print(f"[💾] Label encoder saved to {ENCODER_PATH}")
+print(f"Model saved to {MODEL_PATH}")
+print(f"Label encoder saved to {ENCODER_PATH}")

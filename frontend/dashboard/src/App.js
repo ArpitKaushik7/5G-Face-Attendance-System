@@ -1,7 +1,7 @@
 import React from 'react';
-import AttendanceTable from 'E:/5G Face Attendance System/frontend/dashboard/src/components/attendanceTable.js';
-import StudentForm from 'E:/5G Face Attendance System/frontend/dashboard/src/components/studentForm.js';
-import StudentSearch from 'E:/5G Face Attendance System/frontend/dashboard/src/components/studentSearch.js';
+import AttendanceTable from '/home/user/5G-Face-Attendance-System/frontend/dashboard/src/components/attendanceTable.js';
+import StudentForm from '/home/user/5G-Face-Attendance-System/frontend/dashboard/src/components/studentForm.js';
+import StudentSearch from '/home/user/5G-Face-Attendance-System/frontend/dashboard/src/components/studentSearch.js';
 
 function App() {
   return (

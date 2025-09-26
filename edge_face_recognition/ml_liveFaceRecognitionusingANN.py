@@ -8,22 +8,25 @@ from insightface.app import FaceAnalysis
 from sync_excel import get_student_details, load_excel
 
 # === CONFIGURATION ===
-MODEL_PATH = r"E:\5G Face Attendance System\edge_face_recognition\models\ann_model.joblib"
-LABEL_ENCODER_PATH = r"E:\5G Face Attendance System\edge_face_recognition\models\label_encoder.joblib"
+MODEL_PATH = '/home/user/5G-Face-Attendance-System/models/ann_model.joblib'
+LABEL_ENCODER_PATH = '/home/user/5G-Face-Attendance-System/models/label_encoder.joblib'
 
-DB_CONFIG = {
-    "dbname": "attendance_db",
-    "user": "admin",
-    "password": "Kaushikjii@7",
-    "host": "localhost",
-    "port": 5432,
-}
-SUBJECT = "AI/ML"
-LECTURE_SLOT = "10:00 AM - 11:00 AM"
+print("MODEL_PATH =", MODEL_PATH)
+print("LABEL_ENCODER_PATH =", LABEL_ENCODER_PATH)
 
 # === LOAD MODEL AND ENCODER ===
 model = joblib.load(MODEL_PATH)
 le = joblib.load(LABEL_ENCODER_PATH)
+
+DB_CONFIG = {
+    "dbname": "db_5g_fas",
+    "user": "admin",
+    "password": "user@5glab",
+    "host": "localhost",
+    "port": 5432,
+}
+SUBJECT = "5G UCL COT"
+LECTURE_SLOT = "10:00 AM - 11:00 AM"
 
 # === FACE ANALYSIS ===
 face_app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
@@ -34,13 +37,48 @@ df = load_excel()
 marked_times = {}
 TIME_LIMIT_MINUTES = 60  # Prevent double marking within 1 hour
 
-cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture("rtsp://admin:admin123@10.45.0.201:554/avstream/channel=<1>/stream=<0-mainstream;1-substream>.sdp")
+# desired_width = 800
+# desired_height = 600
+# cv2.namedWindow('5G Camera Stream', cv2.WINDOW_NORMAL)
+# cv2.resizeWindow('5G Camera Stream', desired_width, desired_height)
+# print("[INFO] Scanning...")
+
+# === STREAM SETUP CHANGES ===
+# Change the video capture source to your RTSP URL
+rtsp_url = "rtsp://admin:admin123@10.45.0.201:554/avstream/channel=<1>/stream=<0-mainstream;1-substream>.sdp"
+cap = cv2.VideoCapture(rtsp_url)
+
+# Set buffer size to 1 to reduce delay
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+
+# Lower the resolution and FPS to reduce data load
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+desired_width = 800
+desired_height = 600
+cv2.namedWindow('5G Camera Stream', cv2.WINDOW_NORMAL)
+cv2.resizeWindow('5G Camera Stream', desired_width, desired_height)
+cap.set(cv2.CAP_PROP_FPS, 15) # Example: set to 15 FPS
+
 print("[INFO] Scanning...")
+
+# === MAIN LOOP CHANGES ===
+frame_counter = 0
+skip_frames = 5 # Process every 5th frame for better performance
 
 while True:
     ret, frame = cap.read()
     if not ret:
         break
+
+    # Process frames selectively to reduce CPU load
+    frame_counter += 1
+    if frame_counter % skip_frames != 0:
+        cv2.imshow('5G Camera Stream', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        continue
 
     now = datetime.datetime.now()
     faces = face_app.get(frame)
@@ -95,10 +133,10 @@ while True:
                         conn.commit()
 
                         marked_times[key] = now
-                        print(f"[✅] Attendance marked for: {name} ({predicted_id})")
+                        print(f"Attendance marked for: {name} ({predicted_id})")
                         name_display = f"{name} ({predicted_id})"
                     else:
-                        print(f"[⛔] Already marked within last 1 hour for {predicted_id}")
+                        print(f"Already marked within last 1 hour for {predicted_id}")
                         name_display = f"{predicted_id} [Already Marked <1hr]"
 
                     cursor.close()
@@ -115,7 +153,7 @@ while True:
         cv2.putText(frame, name_display, (x1, y1 - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-    cv2.imshow("Face Attendance", frame)
+    cv2.imshow('5G Camera Stream', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 

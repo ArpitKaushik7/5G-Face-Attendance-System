@@ -4,7 +4,7 @@ import pandas as pd
 import os
 
 router = APIRouter()
-EXCEL_PATH = r"E:\\5G Face Attendance System\\form_responses.xlsx"
+EXCEL_PATH = '/home/user/5G-Face-Attendance-System/form_responses.xlsx'
 
 class Student(BaseModel):
     Id: str

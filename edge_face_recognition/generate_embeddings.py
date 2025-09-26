@@ -5,8 +5,8 @@ from collections import defaultdict
 from insightface.app import FaceAnalysis
 
 # === PATHS ===
-INPUT_DIR = r"E:\5G Face Attendance System\augmented_faces"
-OUTPUT_DIR = r"E:\5G Face Attendance System\ann_data"
+INPUT_DIR = '/home/user/5G-Face-Attendance-System/augmented_faces'
+OUTPUT_DIR = '/home/user/5G-Face-Attendance-System/ann_data'
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # === Initialize FaceAnalysis ===
@@ -47,8 +47,8 @@ for student_id, files in student_images.items():
     if embeddings:
         embeddings_array = np.array(embeddings)
         np.save(os.path.join(OUTPUT_DIR, f"{student_id}_embeddings.npy"), embeddings_array)
-        print(f"[✅] Saved: {student_id}_embeddings.npy ({embeddings_array.shape})")
+        print(f"Saved: {student_id}_embeddings.npy ({embeddings_array.shape})")
     else:
-        print(f"[❌] No embeddings found for {student_id}")
+        print(f"No embeddings found for {student_id}")
 
-print("\n[✅] Embedding generation completed.")
+print("\nEmbedding generation completed.")

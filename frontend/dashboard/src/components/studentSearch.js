@@ -41,18 +41,31 @@ const StudentSearch = () => {
               <th>ID</th>
               <th>Subject</th>
               <th>Lecture Slot</th>
+              <th>Date</th>
               <th>Time</th>
             </tr>
           </thead>
           <tbody>
-            {records.map((entry, index) => (
-              <tr key={index}>
-                <td>{entry.id}</td>
-                <td>{entry.subject}</td>
-                <td>{entry.lecture_slot}</td>
-                <td>{new Date(entry.time).toLocaleString()}</td>
-              </tr>
-            ))}
+            {records.map((entry, index) => {
+              // Combine date and time to create a full datetime string
+              const combinedDateTimeString = `${entry.date}T${entry.time}`;
+
+              // Create a new Date object from the combined string
+              const formattedDateTime = new Date(combinedDateTimeString);
+
+              // Check if the Date object is valid before rendering
+              const isDateValid = !isNaN(formattedDateTime);
+
+              return (
+                <tr key={index}>
+                  <td>{entry.id}</td>
+                  <td>{entry.subject}</td>
+                  <td>{entry.lecture_slot}</td>
+                  <td>{isDateValid ? formattedDateTime.toLocaleDateString() : 'Invalid Date'}</td>
+                  <td>{isDateValid ? formattedDateTime.toLocaleTimeString() : 'Invalid Time'}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

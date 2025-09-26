@@ -5,8 +5,8 @@ from PIL import Image, ImageEnhance, ImageFilter
 import random
 
 # === CONFIG ===
-INPUT_DIR = r"E:\5G Face Attendance System\student's faces"
-OUTPUT_DIR = r"E:\5G Face Attendance System\augmented_faces"
+INPUT_DIR = '/home/user/5G-Face-Attendance-System/student\'s faces'
+OUTPUT_DIR = '/home/user/5G-Face-Attendance-System/augmented_faces'
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # === AUGMENTATION FUNCTIONS ===

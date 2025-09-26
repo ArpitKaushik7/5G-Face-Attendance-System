@@ -1,6 +1,6 @@
 import cv2
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("rtsp://admin:admin123@10.45.0.201:554/avstream/channel=<1>/stream=<0-mainstream;1-substream>.sdp")
 
 while True:
     ret, frame = cap.read()
